@@ -108,3 +108,6 @@ Ver [`docs/roadmap.md`](docs/roadmap.md) para el estado actual del proyecto.
 | KPI | Ingresos Totales |
 | KPI | Total de Transacciones |
 | KPI | Ticket Promedio por Venta |
+
+
+repo https://github.com/Qu3zada22/Lab4-bd2.git
