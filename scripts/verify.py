@@ -1,15 +1,16 @@
 """
 scripts/verify.py
 ─────────────────
-Valida las agregaciones de Gráfica 3 y KPI 3 contra MongoDB.
-Usar después de ingest.py para confirmar que los datos están correctos.
+Valida las agregaciones contra MongoDB.
+
+Incluye:
+  - KPI 2  → Total de Transacciones
+  - KPI 3  → Ticket Promedio por Venta
+  - Gráfica 2 → Ingresos por Mes
+  - Gráfica 3 → Método de Pago
 
 Uso
 ───
-  # uv
-  uv run scripts/verify.py
-
-  # venv
   source .venv/bin/activate
   python scripts/verify.py
 """
@@ -19,7 +20,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.aggregations.queries import average_ticket, sales_by_payment
+from src.aggregations.queries import (
+    average_ticket,
+    sales_by_payment,
+    total_transactions,
+    revenue_by_month,
+)
 from src.config.settings import MONGO_COLLECTION, MONGO_DB, MONGO_URI
 from src.ingestion.bulk_writer import get_collection
 
@@ -27,11 +33,22 @@ from src.ingestion.bulk_writer import get_collection
 def main() -> None:
     collection = get_collection(MONGO_URI, MONGO_DB, MONGO_COLLECTION)
 
-    # ── KPI 3: Ticket Promedio ────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────
+    # KPI 2: Total de Transacciones
+    # ────────────────────────────────────────────────────────────
+    print("─── KPI 2: Total de Transacciones ─────────────────────────")
+    total = total_transactions(collection)
+    print(f"  Total: {total}")
+
+    # ────────────────────────────────────────────────────────────
+    # KPI 3: Ticket Promedio
+    # ────────────────────────────────────────────────────────────
     ticket = average_ticket(collection)
-    print("─── KPI 3: Ticket Promedio por Venta ────────────────────────────")
+
+    print("\n─── KPI 3: Ticket Promedio por Venta ─────────────────────")
     print(f"  Global:  {ticket['global']:>8.2f}")
     print()
+
     for row in ticket["by_payment"]:
         print(
             f"  {row['cash_type']:<8}"
@@ -41,8 +58,20 @@ def main() -> None:
             f"  n={row['count']:>5}"
         )
 
-    # ── Gráfica 3: Método de pago ─────────────────────────────────────────────
-    print("\n─── Gráfica 3: Método de pago (Donut) ───────────────────────────")
+    # ────────────────────────────────────────────────────────────
+    # Gráfica 2: Ingresos por Mes
+    # ────────────────────────────────────────────────────────────
+    print("\n─── Gráfica 2: Ingresos por Mes ───────────────────────────")
+    for row in revenue_by_month(collection):
+        print(
+            f"  {row['year']}-{row['month']:02d}"
+            f"  ingresos={row['ingresos']:>10.2f}"
+        )
+
+    # ────────────────────────────────────────────────────────────
+    # Gráfica 3: Método de Pago
+    # ────────────────────────────────────────────────────────────
+    print("\n─── Gráfica 3: Método de Pago (Donut) ────────────────────")
     for row in sales_by_payment(collection):
         print(
             f"  {row['cash_type']:<8}"

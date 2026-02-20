@@ -10,6 +10,10 @@ Pipelines de agregación para Gráfica 3 y KPI 3.
 from pymongo.collection import Collection
 
 
+
+
+
+
 def sales_by_payment(collection: Collection) -> list[dict]:
     """
     Gráfica 3 — Distribución de transacciones por método de pago.
@@ -115,3 +119,54 @@ def average_ticket(collection: Collection) -> dict:
     )
 
     return {"global": global_avg, "by_payment": by_payment}
+
+
+def total_transactions(collection: Collection) -> int:
+    """
+    KPI 2 — Total de transacciones.
+    Retorna el número total de documentos en la colección.
+    """
+    return collection.count_documents({}) 
+
+
+def revenue_by_month(collection: Collection) -> list[dict]:
+    """
+    Gráfica 2 — Ingresos por mes (Line Chart)
+
+    Retorna:
+      [
+        {
+          "year": 2023,
+          "month": 1,
+          "ingresos": 12345.67
+        },
+        ...
+      ]
+    """
+    pipeline = [
+        {
+            "$group": {
+                "_id": {
+                    "year": {"$year": "$date"},
+                    "month": {"$month": "$date"},
+                },
+                "ingresos": {"$sum": "$money"},
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "year": "$_id.year",
+                "month": "$_id.month",
+                "ingresos": {"$round": ["$ingresos", 2]},
+            }
+        },
+        {
+            "$sort": {
+                "year": 1,
+                "month": 1,
+            }
+        },
+    ]
+
+    return list(collection.aggregate(pipeline))
