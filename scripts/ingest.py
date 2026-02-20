@@ -24,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.config.settings import DATA_DIR, MONGO_COLLECTION, MONGO_DB, MONGO_URI
 from src.ingestion.bulk_writer import bulk_insert, get_collection
+from src.ingestion.indexes import create_indexes
 from src.ingestion.loader import load_all
 
 
@@ -52,6 +53,9 @@ def main() -> None:
     print("\nEjecutando bulk_write …")
     inserted = bulk_insert(collection, sales)
     print(f"\nListo. {inserted} documentos insertados en {MONGO_DB}.{MONGO_COLLECTION}")
+
+    print("\nCreando índices …")
+    create_indexes(collection)
 
 
 if __name__ == "__main__":
