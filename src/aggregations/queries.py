@@ -1,13 +1,63 @@
 """
 queries.py
 ──────────
-Pipelines de agregación para Gráfica 3 y KPI 3.
+Pipelines de agregación para las gráficas y KPIs del dashboard.
 
+  Gráfica 1 — Ventas por tipo de café (Bar Chart)
   Gráfica 3 — Método de pago: Efectivo vs Tarjeta (Donut/Pie Chart)
+  KPI 1     — Ingresos Totales
   KPI 3     — Ticket Promedio por Venta
 """
 
 from pymongo.collection import Collection
+
+
+def sales_by_coffee(collection: Collection) -> list[dict]:
+    """
+    Gráfica 1 — Ventas agrupadas por tipo de café (Bar Chart).
+
+    Retorna por cada coffee_name:
+      - count    : número de ventas
+      - ingresos : suma total de money
+    Ordenado de mayor a menor cantidad de ventas.
+    """
+    pipeline = [
+        # Agrupar por nombre del café
+        {
+            "$group": {
+                "_id": "$coffee_name",
+                "count": {"$sum": 1},
+                "ingresos": {"$sum": "$money"},
+            }
+        },
+        # Proyectar campos legibles
+        {
+            "$project": {
+                "_id": 0,
+                "coffee_name": "$_id",
+                "count": "$count",
+                "ingresos": {"$round": ["$ingresos", 2]},
+            }
+        },
+        # De mayor a menor ventas (eje Y del Bar Chart)
+        {"$sort": {"count": -1}},
+    ]
+    return list(collection.aggregate(pipeline))
+
+
+def total_revenue(collection: Collection) -> float:
+    """
+    KPI 1 — Ingresos Totales: suma de todos los valores de money.
+
+    Retorna un float con el total redondeado a 2 decimales.
+    """
+    result = list(
+        collection.aggregate([
+            {"$group": {"_id": None, "total": {"$sum": "$money"}}},
+            {"$project": {"_id": 0, "total": {"$round": ["$total", 2]}}},
+        ])
+    )
+    return result[0]["total"] if result else 0.0
 
 
 def sales_by_payment(collection: Collection) -> list[dict]:
