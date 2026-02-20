@@ -1,0 +1,28 @@
+[project]
+name = "lab4-mongodb-charts"
+version = "0.1.0"
+description = "MongoDB Charts lab – coffee shop sales dashboard"
+requires-python = ">=3.11"
+dependencies = [
+    "pymongo[srv]>=4.7",
+    "python-dotenv>=1.0",
+    "pandas>=2.2",
+]
+
+[project.scripts]
+ingest = "scripts.ingest:main"
+verify = "scripts.verify:main"
+
+[tool.uv]
+dev-dependencies = []
+
+# ─── How to run ───────────────────────────────────────────────────────────────
+# uv:
+#   uv sync
+#   uv run scripts/ingest.py
+#
+# venv:
+#   python -m venv .venv
+#   source .venv/bin/activate        # Windows: .venv\Scripts\activate
+#   pip install -r requirements.txt
+#   python scripts/ingest.py

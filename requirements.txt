@@ -1,0 +1,5 @@
+# Generated from pyproject.toml – keep in sync manually or via:
+#   pip freeze > requirements.txt  (after pip install -e .)
+pymongo[srv]>=4.7
+python-dotenv>=1.0
+pandas>=2.2

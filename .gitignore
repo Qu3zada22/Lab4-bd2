@@ -1,0 +1,27 @@
+# Environment
+.env
+*.env.local
+
+# Python – venv
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+dist/
+build/
+*.egg-info/
+
+# uv
+.uv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
